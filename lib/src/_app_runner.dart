@@ -77,7 +77,7 @@ class _App extends StatelessWidget {
     final FlutterExceptionHandler? oldCallback = FlutterError.onError;
 
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
-      oldCallback?.call(errorDetails);
+      // oldCallback?.call(errorDetails);
       widgetConfig.onFlutterError(errorDetails);
     };
   }
