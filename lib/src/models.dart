@@ -53,6 +53,7 @@ abstract class RunnerConfiguration {
   const factory RunnerConfiguration({
     required WidgetConfiguration widgetConfig,
     ui.ErrorCallback? onPlatformError,
+    bool keepOldCallback,
   }) = _RunnerConfiguration;
 
   /// Runner Configuration Guarded
@@ -61,12 +62,16 @@ abstract class RunnerConfiguration {
   const factory RunnerConfiguration.guarded({
     required WidgetConfiguration widgetConfig,
     required ZoneConfiguration zoneConfig,
+    bool keepOldCallback,
   }) = _RunnerConfigurationGuarded;
 
-  const RunnerConfiguration._(this.widgetConfig);
+  const RunnerConfiguration._(this.widgetConfig, {this.keepOldCallback = true});
 
   /// {@macro WidgetConfiguration}
   final WidgetConfiguration widgetConfig;
+
+  /// If this method returns [true], existing error handlers will be included in the new ones.
+  final bool keepOldCallback;
 }
 
 class _RunnerConfiguration extends RunnerConfiguration {
@@ -74,11 +79,13 @@ class _RunnerConfiguration extends RunnerConfiguration {
   const _RunnerConfiguration({
     required WidgetConfiguration widgetConfig,
     this.onPlatformError,
+    this.keepOldCallback = true,
   }) : super._(widgetConfig);
 
   /// A callback that is invoked when an unhandled error occurs in the root isolate.
   /// If this method returns [false], the engine may use some fallback method to provide information about the error.
   final ui.ErrorCallback? onPlatformError;
+  final bool keepOldCallback;
 }
 
 class _RunnerConfigurationGuarded extends RunnerConfiguration {
@@ -86,10 +93,12 @@ class _RunnerConfigurationGuarded extends RunnerConfiguration {
   const _RunnerConfigurationGuarded({
     required WidgetConfiguration widgetConfig,
     required this.zoneConfig,
+    this.keepOldCallback = true,
   }) : super._(widgetConfig);
 
   /// {@macro ZoneConfiguration}
   final ZoneConfiguration zoneConfig;
+  final bool keepOldCallback;
 }
 
 /// {@template WidgetConfiguration}

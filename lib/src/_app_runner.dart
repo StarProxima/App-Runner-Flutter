@@ -10,7 +10,7 @@ mixin _AppRunner on WidgetsBinding {
         zoneSpecification: config.zoneConfig.zoneSpecification,
       );
     } else if (config is _RunnerConfiguration) {
-      _platformErrorSetup(config.onPlatformError);
+      _platformErrorSetup(config.onPlatformError, config.keepOldCallback);
       _attach(config);
     } else {
       _attach(config);
@@ -32,19 +32,23 @@ mixin _AppRunner on WidgetsBinding {
       )
       ..scheduleForcedFrame();
 
-    _flutterErrorSetup(config.widgetConfig);
+    _flutterErrorSetup(config.widgetConfig, config.keepOldCallback);
   }
 
-  static void _flutterErrorSetup(WidgetConfiguration widgetConfig) {
+  static void _flutterErrorSetup(
+    WidgetConfiguration widgetConfig,
+    bool keepOldCallback,
+  ) {
     final FlutterExceptionHandler? oldCallback = FlutterError.onError;
 
     FlutterError.onError = (FlutterErrorDetails errorDetails) {
-      oldCallback?.call(errorDetails);
+      if (keepOldCallback) oldCallback?.call(errorDetails);
       widgetConfig.onFlutterError(errorDetails);
     };
   }
 
-  static void _platformErrorSetup(final ui.ErrorCallback? onPlatformError) {
+  static void _platformErrorSetup(
+      final ui.ErrorCallback? onPlatformError, bool keepOldCallback) {
     if (onPlatformError == null) return;
 
     final ui.ErrorCallback? oldCallback = PlatformDispatcher.instance.onError;
@@ -53,7 +57,8 @@ mixin _AppRunner on WidgetsBinding {
       Object exception,
       StackTrace stackTrace,
     ) {
-      final bool? oldCallbackResult = oldCallback?.call(exception, stackTrace);
+      final bool? oldCallbackResult =
+          keepOldCallback ? oldCallback?.call(exception, stackTrace) : null;
       final bool newCallbackResult = onPlatformError(exception, stackTrace);
 
       return oldCallbackResult == null
